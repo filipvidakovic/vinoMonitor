@@ -1,0 +1,11 @@
+[workspace]
+members = [
+    "auth-service",
+    "vineyard-service",
+    "harvest-service",
+    "fermentation-service",
+    "inventory-service",
+    "analytics-service"
+]
+
+resolver = "2"
