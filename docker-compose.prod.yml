@@ -1,0 +1,53 @@
+﻿version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: vinomonitor-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-vinomonitor}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vinopassword}
+      POSTGRES_DB: ${POSTGRES_DB:-vinomonitor_auth}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - vinomonitor-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vinomonitor}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vinomonitor-auth-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-vinomonitor}:${POSTGRES_PASSWORD:-vinopassword}@postgres:5432/${POSTGRES_DB:-vinomonitor_auth}
+      HOST: 0.0.0.0
+      PORT: 8001
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_HOURS: ${JWT_EXPIRATION_HOURS:-24}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      RUST_LOG: ${RUST_LOG:-info,auth_service=debug}
+    ports:
+      - "${AUTH_PORT:-8001}:8001"
+    networks:
+      - vinomonitor-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  vinomonitor-network:
+    driver: bridge

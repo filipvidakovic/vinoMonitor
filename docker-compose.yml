@@ -1,0 +1,214 @@
+﻿services:
+
+  # ─────────────────────────────────────────────
+  # DATABASES
+  # ─────────────────────────────────────────────
+
+  postgres-auth:
+    image: postgres:16-alpine
+    container_name: vinomonitor-postgres-auth
+    environment:
+      POSTGRES_USER: vinomonitor
+      POSTGRES_PASSWORD: vinopassword
+      POSTGRES_DB: vinomonitor_auth
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vinomonitor"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vinomonitor-network
+
+  postgres-vineyard:
+    image: postgres:16-alpine
+    container_name: vinomonitor-postgres-vineyard
+    environment:
+      POSTGRES_USER: vinomonitor
+      POSTGRES_PASSWORD: vinopassword
+      POSTGRES_DB: vinomonitor_vineyard
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_vineyard_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vinomonitor"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vinomonitor-network
+
+  postgres-harvest:
+    image: postgres:16-alpine
+    container_name: vinomonitor-postgres-harvest
+    environment:
+      POSTGRES_USER: vinomonitor
+      POSTGRES_PASSWORD: vinopassword
+      POSTGRES_DB: vinomonitor_harvest
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_harvest_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vinomonitor"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vinomonitor-network
+
+  postgres-fermentation:
+    image: postgres:16-alpine
+    container_name: vinomonitor-postgres-fermentation
+    environment:
+      POSTGRES_USER: vinomonitor
+      POSTGRES_PASSWORD: vinopassword
+      POSTGRES_DB: vinomonitor_fermentation
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_fermentation_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vinomonitor"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vinomonitor-network
+
+  # ─────────────────────────────────────────────
+  # SERVICES
+  # ─────────────────────────────────────────────
+
+#  auth-service:
+#    build:
+#      context: ./auth-service
+#      dockerfile: Dockerfile
+#    container_name: vinomonitor-auth-service
+#    depends_on:
+#      postgres-auth:
+#        condition: service_healthy
+#    environment:
+#      DATABASE_URL: postgresql://vinomonitor:vinopassword@postgres-auth:5432/vinomonitor_auth
+#      HOST: 0.0.0.0
+#      PORT: 8001
+#      JWT_SECRET: ${JWT_SECRET:-change-this-secret-in-production-minimum-32-chars}
+#      JWT_EXPIRATION_HOURS: 24
+#      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+#      RUST_LOG: info,auth_service=debug
+#    ports:
+#      - "8001:8001"
+#    networks:
+#      - vinomonitor-network
+#    restart: unless-stopped
+#    healthcheck:
+#      test: ["CMD-SHELL", "curl -f http://localhost:8001/api/v1/auth/health || exit 1"]
+#      interval: 15s
+#      timeout: 5s
+#      retries: 3
+#      start_period: 10s
+#
+#  vineyard-service:
+#    build:
+#      context: ./vineyard-service
+#      dockerfile: Dockerfile
+#    container_name: vinomonitor-vineyard-service
+#    depends_on:
+#      postgres-vineyard:
+#        condition: service_healthy
+#      auth-service:
+#        condition: service_healthy
+#    environment:
+#      DATABASE_URL: postgresql://vinomonitor:vinopassword@postgres-vineyard:5432/vinomonitor_vineyard
+#      HOST: 0.0.0.0
+#      PORT: 8002
+#      JWT_SECRET: ${JWT_SECRET:-change-this-secret-in-production-minimum-32-chars}
+#      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+#      RUST_LOG: info,vineyard_service=debug
+#    ports:
+#      - "8002:8002"
+#    networks:
+#      - vinomonitor-network
+#    restart: unless-stopped
+#    healthcheck:
+#      test: ["CMD-SHELL", "curl -f http://localhost:8002/api/v1/health || exit 1"]
+#      interval: 15s
+#      timeout: 5s
+#      retries: 3
+#      start_period: 10s
+#
+#  harvest-service:
+#    build:
+#      context: ./harvest-service
+#      dockerfile: Dockerfile
+#    container_name: vinomonitor-harvest-service
+#    depends_on:
+#      postgres-harvest:
+#        condition: service_healthy
+#      auth-service:
+#        condition: service_healthy
+#    environment:
+#      DATABASE_URL: postgresql://vinomonitor:vinopassword@postgres-harvest:5432/vinomonitor_harvest
+#      HOST: 0.0.0.0
+#      PORT: 8003
+#      JWT_SECRET: ${JWT_SECRET:-change-this-secret-in-production-minimum-32-chars}
+#      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+#      RUST_LOG: info,harvest_service=debug
+#    ports:
+#      - "8003:8003"
+#    networks:
+#      - vinomonitor-network
+#    restart: unless-stopped
+#    healthcheck:
+#      test: ["CMD-SHELL", "curl -f http://localhost:8003/api/v1/health || exit 1"]
+#      interval: 15s
+#      timeout: 5s
+#      retries: 3
+#      start_period: 10s
+#
+#  fermentation-service:
+#    build:
+#      context: ./fermentation-service
+#      dockerfile: Dockerfile
+#    container_name: vinomonitor-fermentation-service
+#    depends_on:
+#      postgres-fermentation:
+#        condition: service_healthy
+#      auth-service:
+#        condition: service_healthy
+#    environment:
+#      DATABASE_URL: postgresql://vinomonitor:vinopassword@postgres-fermentation:5432/vinomonitor_fermentation
+#      HOST: 0.0.0.0
+#      PORT: 8004
+#      JWT_SECRET: ${JWT_SECRET:-change-this-secret-in-production-minimum-32-chars}
+#      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+#      RUST_LOG: info,fermentation_service=debug
+#    ports:
+#      - "8004:8004"
+#    networks:
+#      - vinomonitor-network
+#    restart: unless-stopped
+#    healthcheck:
+#      test: ["CMD-SHELL", "curl -f http://localhost:8004/api/v1/health || exit 1"]
+#      interval: 15s
+#      timeout: 5s
+#      retries: 3
+#      start_period: 10s
+
+# ─────────────────────────────────────────────
+# VOLUMES & NETWORKS
+# ─────────────────────────────────────────────
+
+volumes:
+  postgres_auth_data:
+  postgres_vineyard_data:
+  postgres_harvest_data:
+  postgres_fermentation_data:
+
+networks:
+  vinomonitor-network:
+    driver: bridge
