@@ -86,8 +86,8 @@
 
 #  auth-service:
 #    build:
-#      context: ./auth-service
-#      dockerfile: Dockerfile
+#      context: .
+#      dockerfile: auth-service/Dockerfile
 #    container_name: vinomonitor-auth-service
 #    depends_on:
 #      postgres-auth:
@@ -114,8 +114,8 @@
 #
 #  vineyard-service:
 #    build:
-#      context: ./vineyard-service
-#      dockerfile: Dockerfile
+#      context: .
+#      dockerfile: vineyard-service/Dockerfile
 #    container_name: vinomonitor-vineyard-service
 #    depends_on:
 #      postgres-vineyard:
@@ -143,8 +143,8 @@
 #
 #  harvest-service:
 #    build:
-#      context: ./harvest-service
-#      dockerfile: Dockerfile
+#      context: .
+#      dockerfile: harvest-service/Dockerfile
 #    container_name: vinomonitor-harvest-service
 #    depends_on:
 #      postgres-harvest:
@@ -172,8 +172,8 @@
 #
 #  fermentation-service:
 #    build:
-#      context: ./fermentation-service
-#      dockerfile: Dockerfile
+#      context: .
+#      dockerfile: fermentation-service/Dockerfile
 #    container_name: vinomonitor-fermentation-service
 #    depends_on:
 #      postgres-fermentation:
@@ -198,6 +198,26 @@
 #      timeout: 5s
 #      retries: 3
 #      start_period: 10s
+
+#  frontend:
+#    build:
+#      context: ./frontend
+#      dockerfile: Dockerfile
+#    container_name: vinomonitor-frontend
+#    depends_on:
+#      auth-service:
+#        condition: service_healthy
+#      vineyard-service:
+#        condition: service_healthy
+#      harvest-service:
+#        condition: service_healthy
+#      fermentation-service:
+#        condition: service_healthy
+#    ports:
+#      - "3000:80"
+#    networks:
+#      - vinomonitor-network
+#    restart: unless-stopped
 
 # ─────────────────────────────────────────────
 # VOLUMES & NETWORKS

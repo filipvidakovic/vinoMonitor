@@ -55,7 +55,7 @@ async fn main() -> anyhow::Result<()> {
     };
 
     // Create router
-    let app = routes::create_router(app_state)
+    let app = routes::create_router(app_state, settings.clone())
         .layer(
             CorsLayer::new()
                 .allow_origin(

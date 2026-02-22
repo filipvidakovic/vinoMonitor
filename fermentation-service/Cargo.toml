@@ -3,10 +3,6 @@ name = "fermentation-service"
 version = "0.1.0"
 edition = "2021"
 
-[[bin]]
-name = "fermentation-service"
-path = "src/main.rs"
-
 [dependencies]
 axum = { version = "0.7", features = ["macros"] }
 axum-extra = { version = "0.9", features = ["typed-header"] }
