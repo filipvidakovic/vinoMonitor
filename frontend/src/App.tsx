@@ -6,6 +6,11 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Vineyards from './pages/Vineyards';
 import Layout from './components/Layout';
+import Fermentation from './pages/Fermentation';
+import Harvests from './pages/Harvests';
+import VineyardDetail from './pages/VineyardDetail';
+import FermentationDetail from './pages/FermentationDetail';
+import HarvestDetail from './pages/HarvestDetail';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -26,6 +31,12 @@ function App() {
           <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
             <Route index element={<Dashboard />} />
             <Route path="vineyards" element={<Vineyards />} />
+            <Route path="vineyards/:id" element={<VineyardDetail />} />
+            <Route path="harvests" element={<Harvests />} />
+            <Route path="harvests/:id" element={<HarvestDetail />} />
+            <Route path="fermentation" element={<Fermentation />} />
+            <Route path="fermentation/:id" element={<FermentationDetail />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>

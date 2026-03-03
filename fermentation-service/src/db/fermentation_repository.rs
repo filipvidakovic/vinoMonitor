@@ -441,10 +441,7 @@ impl FermentationRepository {
                  ORDER BY recorded_at DESC LIMIT 1)         AS latest_ph,
                 (SELECT alcohol_percent FROM fermentation_readings
                  WHERE batch_id = $1 AND alcohol_percent IS NOT NULL
-                 ORDER BY recorded_at DESC LIMIT 1)         AS latest_alcohol,
-                EXTRACT(EPOCH FROM (
-                    COALESCE(MAX(recorded_at), NOW()) - MIN(recorded_at)
-                )) / 86400.0                                AS duration_days
+                 ORDER BY recorded_at DESC LIMIT 1)         AS latest_alcohol
             FROM fermentation_readings
             WHERE batch_id = $1
             "#,

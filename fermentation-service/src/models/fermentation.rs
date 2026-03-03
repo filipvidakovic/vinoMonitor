@@ -7,7 +7,7 @@ use validator::Validate;
 // ============== Enums ==============
 
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type, PartialEq, Eq)]
-#[sqlx(type_name = "tank_status", rename_all = "lowercase")]
+#[sqlx(type_name = "tank_status", rename_all = "snake_case")]
 pub enum TankStatus {
     #[serde(rename = "available")]
     Available,
@@ -45,7 +45,6 @@ pub enum FermentationStatus {
     Cancelled,
 }
 
-// ============== Tank (Fermentacioni Tank) ==============
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct Tank {
@@ -355,8 +354,6 @@ impl From<FermentationReading> for ReadingResponse {
     }
 }
 
-// ============== Stats ==============
-
 #[derive(Debug, Serialize, FromRow)]
 pub struct BatchStats {
     pub batch_id: Uuid,
@@ -367,5 +364,4 @@ pub struct BatchStats {
     pub latest_brix: Option<f64>,
     pub latest_ph: Option<f64>,
     pub latest_alcohol: Option<f64>,
-    pub duration_days: Option<f64>,
 }

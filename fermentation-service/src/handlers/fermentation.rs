@@ -4,6 +4,7 @@
     Json,
 };
 use serde::Deserialize;
+use tracing::log::__private_api::log;
 use uuid::Uuid;
 use validator::Validate;
 
@@ -29,10 +30,6 @@ pub struct AppState {
 pub struct ReadingsQuery {
     pub limit: Option<i64>,
 }
-
-// ============================================================
-// Tank handlers
-// ============================================================
 
 pub async fn create_tank(
     auth: AuthenticatedUser,
@@ -79,7 +76,6 @@ pub async fn get_tank(
 ) -> Result<Json<TankResponse>, AppError> {
     let tank = state.repo.find_tank_by_id(tank_id).await?;
 
-    // Dohvati aktivan batch ako postoji
     let batches = state.repo.list_batches_by_tank(tank_id).await?;
     let active_batch_name = batches
         .iter()
@@ -122,10 +118,6 @@ pub async fn delete_tank(
 
     Ok(StatusCode::NO_CONTENT)
 }
-
-// ============================================================
-// Batch handlers
-// ============================================================
 
 pub async fn create_batch(
     auth: AuthenticatedUser,
@@ -268,17 +260,12 @@ pub async fn get_batch_stats(
     State(state): State<AppState>,
     Path(batch_id): Path<Uuid>,
 ) -> Result<Json<BatchStats>, AppError> {
-    // Provjeri da batch postoji
     state.repo.find_batch_by_id(batch_id).await?;
 
     let stats = state.repo.get_batch_stats(batch_id).await?;
 
     Ok(Json(stats))
 }
-
-// ============================================================
-// Reading handlers
-// ============================================================
 
 pub async fn add_reading(
     auth: AuthenticatedUser,
@@ -288,7 +275,6 @@ pub async fn add_reading(
 ) -> Result<(StatusCode, Json<ReadingResponse>), AppError> {
     req.validate()?;
 
-    // Provjeri da batch postoji i aktivan je
     let batch = state.repo.find_batch_by_id(batch_id).await?;
     if batch.status != FermentationStatus::Active {
         return Err(AppError::Conflict(
@@ -312,7 +298,7 @@ pub async fn list_readings(
     Path(batch_id): Path<Uuid>,
     Query(query): Query<ReadingsQuery>,
 ) -> Result<Json<Vec<ReadingResponse>>, AppError> {
-    // Provjeri da batch postoji
+
     state.repo.find_batch_by_id(batch_id).await?;
 
     let readings = state.repo.list_readings(batch_id, query.limit).await?;
@@ -348,9 +334,6 @@ pub async fn iot_reading(
     Ok((StatusCode::CREATED, Json(ReadingResponse::from(reading))))
 }
 
-// ============================================================
-// Health check
-// ============================================================
 
 pub async fn health_check() -> Json<serde_json::Value> {
     Json(serde_json::json!({

@@ -225,7 +225,7 @@ export interface CreateTankRequest {
 
 export interface CreateBatchRequest {
   tank_id: string;
-  harvest_id?: string;
+  harvest_id: string | null;
   name: string;
   grape_variety: string;
   volume_liters: number;
@@ -233,7 +233,7 @@ export interface CreateBatchRequest {
   yeast_strain?: string;
   initial_brix?: number;
   initial_ph?: number;
-  expected_end_date?: string;
+  expected_end_date: string | null;
   notes?: string;
 }
 

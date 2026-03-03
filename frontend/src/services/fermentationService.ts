@@ -62,6 +62,7 @@ export const fermentationService = {
   },
 
   async createBatch(data: CreateBatchRequest): Promise<FermentationBatch> {
+    console.log('Creating batch with data:', data);
     const response = await fermentationApi.post<FermentationBatch>('/batches', data);
     return response.data;
   },
