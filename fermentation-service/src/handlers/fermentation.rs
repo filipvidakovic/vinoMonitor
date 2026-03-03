@@ -3,6 +3,8 @@
     http::StatusCode,
     Json,
 };
+use axum::http::HeaderValue;
+use axum::http::header;
 use serde::Deserialize;
 use tracing::log::__private_api::log;
 use uuid::Uuid;
@@ -334,6 +336,77 @@ pub async fn iot_reading(
     Ok((StatusCode::CREATED, Json(ReadingResponse::from(reading))))
 }
 
+use axum::{
+    response::IntoResponse,
+};
+
+
+/// Generate PDF report for a fermentation batch
+pub async fn export_batch_pdf(
+    auth: AuthenticatedUser,
+    State(state): State<AppState>,
+    Path(batch_id): Path<Uuid>,
+) -> Result<impl IntoResponse, AppError> {
+    // Get batch
+    let batch = state.repo.find_batch_by_id(batch_id).await?;
+
+    // Check ownership
+    if batch.created_by != auth.claims.user_id()? && auth.claims.role != UserRole::Admin {
+        return Err(AppError::Forbidden(
+            "You can only export your own batches".to_string(),
+        ));
+    }
+
+    // Get readings
+    let readings = state
+        .repo
+        .list_readings(batch_id, Some(100))
+        .await
+        .unwrap_or_default();
+
+    // Get stats
+    let stats = state
+        .repo
+        .get_batch_stats(batch_id)
+        .await
+        .unwrap_or_else(|_| {
+            // Return default stats if none exist
+            crate::models::BatchStats {
+                batch_id,
+                total_readings: 0,
+                avg_temperature: None,
+                min_temperature: None,
+                max_temperature: None,
+                latest_brix: None,
+                latest_ph: None,
+                latest_alcohol: None,
+            }
+        });
+
+    // Get tank name
+    let tank = state.repo.find_tank_by_id(batch.tank_id).await?;
+
+    // Generate PDF
+    let pdf_bytes = crate::pdf::generate_batch_report(&batch, &readings, &stats, &tank.name)
+        .map_err(|e| AppError::InternalError(format!("Failed to generate PDF: {}", e)))?;
+
+    // Return PDF
+    let filename = format!("batch_report_{}.pdf", batch.name.replace(" ", "_"));
+
+    let content_disposition = format!("attachment; filename=\"{}\"", filename);
+
+    Ok((
+        StatusCode::OK,
+        [
+            (header::CONTENT_TYPE, HeaderValue::from_static("application/pdf")),
+            (
+                header::CONTENT_DISPOSITION,
+                HeaderValue::from_str(&content_disposition).unwrap(),
+            ),
+        ],
+        pdf_bytes,
+    ))
+}
 
 pub async fn health_check() -> Json<serde_json::Value> {
     Json(serde_json::json!({

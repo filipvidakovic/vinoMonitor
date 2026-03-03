@@ -6,6 +6,7 @@ mod handlers;
 mod middleware;
 mod models;
 mod routes;
+mod pdf;
 
 use std::net::SocketAddr;
 

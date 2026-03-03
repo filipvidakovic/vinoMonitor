@@ -2,9 +2,12 @@
     extract::{Path, State},
     http::StatusCode,
     Json,
+    response::IntoResponse,
 };
 use uuid::Uuid;
 use validator::Validate;
+use axum::http::header;
+use axum::http::HeaderValue;
 
 use crate::{
     config::Settings,
@@ -293,7 +296,61 @@ pub async fn get_vineyard_harvest_stats(
 
     Ok(Json(stats))
 }
+pub async fn export_harvest_pdf(
+    auth: AuthenticatedUser,
+    State(state): State<AppState>,
+    Path(harvest_id): Path<Uuid>,
+) -> Result<impl IntoResponse, AppError> {
+    // Get harvest
+    let harvest = state.harvest_repo.find_by_id(harvest_id).await?;
 
+    // Check ownership
+    if harvest.created_by != auth.claims.user_id()? && auth.claims.role != UserRole::Admin {
+        return Err(AppError::Forbidden(
+            "You can only export your own harvests".to_string(),
+        ));
+    }
+
+    // Get quality measurements
+    let quality_measurements = state
+        .harvest_repo
+        .list_quality_measurements(harvest_id)
+        .await
+        .unwrap_or_default();
+
+    // Get vineyard and parcel names (simplified - you may need to call vineyard service)
+    let vineyard_name = "Vineyard"; // TODO: Fetch from vineyard service via HTTP
+    let parcel_name = "Parcel"; // TODO: Fetch from vineyard service via HTTP
+
+    // Generate PDF
+    let pdf_bytes = crate::pdf::generate_harvest_report(
+        &harvest,
+        &quality_measurements,
+        vineyard_name,
+        parcel_name,
+    )
+        .map_err(|e| AppError::InternalError(format!("Failed to generate PDF: {}", e)))?;
+
+    // Return PDF
+    let filename = format!(
+        "harvest_report_{}.pdf",
+        harvest.harvest_date.format("%Y%m%d")
+    );
+
+    let content_disposition = format!("attachment; filename=\"{}\"", filename);
+
+    Ok((
+        StatusCode::OK,
+        [
+            (header::CONTENT_TYPE, HeaderValue::from_static("application/pdf")),
+            (
+                header::CONTENT_DISPOSITION,
+                HeaderValue::from_str(&content_disposition).unwrap(),
+            ),
+        ],
+        pdf_bytes,
+    ))
+}
 /// Health check
 pub async fn health_check() -> Json<serde_json::Value> {
     Json(serde_json::json!({

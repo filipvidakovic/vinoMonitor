@@ -34,6 +34,7 @@ pub fn create_router(state: AppState, settings: Settings) -> Router {
         .route("/batches/:batch_id/readings", post(handlers::add_reading))
         .route("/batches/:batch_id/readings", get(handlers::list_readings))
         .route("/batches/:batch_id/readings/:reading_id", delete(handlers::delete_reading))
+        .route("/batches/:id/pdf", get(handlers::export_batch_pdf))
         .layer(middleware::from_fn(move |req, next| {
             crate::middleware::add_settings(settings.clone(), req, next)
         }));

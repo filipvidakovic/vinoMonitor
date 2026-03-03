@@ -29,6 +29,7 @@ pub fn create_router(state: AppState, settings: Settings) -> Router {
         .route("/vineyards/:vineyard_id/harvests", get(handlers::list_harvests_by_vineyard))
         .route("/vineyards/:vineyard_id/stats", get(handlers::get_vineyard_harvest_stats))
         .route("/parcels/:parcel_id/harvests", get(handlers::list_harvests_by_parcel))
+        .route("/harvests/:id/pdf", get(handlers::export_harvest_pdf))
         .layer(middleware::from_fn(move |req, next| {
             crate::middleware::add_settings(settings.clone(), req, next)
         }));

@@ -4,6 +4,7 @@ import { fermentationService } from '../services/fermentationService';
 import { useAuth } from '../context/AuthContext';
 import type { FermentationBatch, FermentationReading, Tank, BatchStats } from '../types';
 import '../styles/FermentationDetail.css';
+import { pdfService } from '../services/pdfService';
 
 const FermentationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +18,18 @@ const FermentationDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showReadingModal, setShowReadingModal] = useState(false);
   const [error, setError] = useState('');
+    const [downloadingPDF, setDownloadingPDF] = useState(false);
+
+    const handleDownloadPDF = async () => {
+      setDownloadingPDF(true);
+      try {
+        await pdfService.downloadBatchPDF(id!);
+      } catch (error) {
+        console.error('Failed to download PDF:', error);
+      } finally {
+        setDownloadingPDF(false);
+      }
+    };
 
   const [readingFormData, setReadingFormData] = useState({
     temperature: 0,
@@ -223,7 +236,10 @@ const FermentationDetail: React.FC = () => {
             </button>
           )}
         </div>
-      </div>
+        </div>
+        <button className="btn btn-primary" onClick={handleDownloadPDF} disabled={downloadingPDF}>
+          {downloadingPDF ? 'Preuzimanje...' : 'Preuzmi PDF izveštaj'}
+        </button>
 
       {/* Stats Cards */}
       {stats && (

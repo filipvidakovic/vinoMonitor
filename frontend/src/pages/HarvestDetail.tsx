@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { harvestService } from '../services/harvestService';
 import { vineyardService } from '../services/vineyardService';
+import { pdfService } from '../services/pdfService';
 import { useAuth } from '../context/AuthContext';
 import { type Harvest, type HarvestQuality, HarvestStatus, type Vineyard, type Parcel } from '../types';
 import '../styles/HarvestDetail.css';
@@ -18,6 +19,18 @@ const HarvestDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showQualityModal, setShowQualityModal] = useState(false);
   const [error, setError] = useState('');
+  const [downloadingPDF, setDownloadingPDF] = useState(false);
+
+  const handleDownloadPDF = async () => {
+    setDownloadingPDF(true);
+    try {
+      await pdfService.downloadHarvestPDF(id!);
+    } catch (error) {
+      console.error('Failed to download PDF:', error);
+    } finally {
+      setDownloadingPDF(false);
+    }
+  };
 
   const [qualityFormData, setQualityFormData] = useState({
     brix: 0,
@@ -230,6 +243,9 @@ const HarvestDetail: React.FC = () => {
             </span>
           </div>
         </div>
+        <button className="btn btn-primary" onClick={handleDownloadPDF} disabled={downloadingPDF}>
+          {downloadingPDF ? 'Preuzimanje...' : 'Preuzmi PDF izveštaj'}
+        </button>
         <div className="header-actions">
           {canModify && harvest.status !== 'completed' && harvest.status !== 'cancelled' && (
             <div className="status-dropdown">
