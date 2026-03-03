@@ -13,7 +13,7 @@
     volumes:
       - postgres_auth_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U vinomonitor"]
+      test: ["CMD-SHELL", "pg_isready -U vinomonitor -d vinomonitor_auth"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -32,7 +32,7 @@
     volumes:
       - postgres_vineyard_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U vinomonitor"]
+      test: ["CMD-SHELL", "pg_isready -U vinomonitor -d vinomonitor_vineyard"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -51,7 +51,7 @@
     volumes:
       - postgres_harvest_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U vinomonitor"]
+      test: ["CMD-SHELL", "pg_isready -U vinomonitor -d vinomonitor_harvest"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -70,7 +70,7 @@
     volumes:
       - postgres_fermentation_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U vinomonitor"]
+      test: ["CMD-SHELL", "pg_isready -U vinomonitor -d vinomonitor_fermentation"]
       interval: 10s
       timeout: 5s
       retries: 5
