@@ -4,7 +4,8 @@ import { vineyardService } from '../services/vineyardService';
 import { harvestService } from '../services/harvestService';
 import { fermentationService } from '../services/fermentationService';
 import { useAuth } from '../context/AuthContext';
-import type { Vineyard, Harvest, FermentationBatch } from '../types';
+import { iotService } from '../services/iotService';
+import type { Vineyard, Harvest, FermentationBatch, IotDevice } from '../types';
 import '../styles/Dashboard.css';
 
 interface DashboardStats {
@@ -26,9 +27,12 @@ const Dashboard: React.FC = () => {
   const [recentHarvests, setRecentHarvests] = useState<Harvest[]>([]);
   const [activeBatches, setActiveBatches] = useState<FermentationBatch[]>([]);
   const [loading, setLoading] = useState(true);
+  const [iotDevices, setIotDevices] = useState<IotDevice[] | null>(null);
 
   useEffect(() => {
     loadDashboardData();
+    // Odvojeno, da nedostupan IoT servis ne sruši ceo dashboard
+    iotService.getDevices().then(setIotDevices).catch(() => setIotDevices(null));
   }, []);
 
   const loadDashboardData = async () => {
@@ -135,6 +139,23 @@ const Dashboard: React.FC = () => {
             <div className="stat-detail">Svi servisi aktivni</div>
           </div>
         </div>
+
+        <Link to="/iot" className="stat-card" style={{ textDecoration: 'none' }}>
+          <div className="stat-icon" style={{ background: '#e0f2f1' }}>
+            📡
+          </div>
+          <div className="stat-content">
+            <div className="stat-label">IoT Uređaji Online</div>
+            <div className="stat-value">
+              {iotDevices
+                ? `${iotDevices.filter((d) => d.status === 'online').length}/${iotDevices.length}`
+                : '—'}
+            </div>
+            <div className="stat-detail">
+              {iotDevices ? 'Senzori tankova i vinograda' : 'IoT servis nedostupan'}
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Quick Actions */}

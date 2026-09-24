@@ -146,11 +146,47 @@ DODATNI SERVISI
 
 ## Primena IoT senzora
 
-Sistem podržava povezivanje sa hardverskim IoT senzorima, na primer za praćenje temperature i vlažnosti tokom fermentacije. IoT funkcionalnost se razvija u Python okruženju i lako se integriše sa Rust mikroservisima putem REST API-ja ili MQTT-a.
+Sistem podržava povezivanje sa hardverskim IoT senzorima na Raspberry Pi-ju:
+
+- **Fermentacioni tankovi:** temperatura i vlažnost (DHT22 / DS18B20)
+- **Vinogradi:** sunčeva svetlost (BH1750) i temperatura
+
+Komponente:
+
+- **`iot-device/`** (Python, Raspberry Pi): čita senzore i šalje merenja preko MQTT-a. Detalji, povezivanje i instalacija: [iot-device/README.md](iot-device/README.md)
+- **Mosquitto** (MQTT broker, port `1883`): konfiguracija u `mosquitto/config/mosquitto.conf`
+- **`iot-service`** (Rust, port `8005`, baza `vinomonitor_iot`): prima telemetriju i status uređaja, čuva merenja, šalje komande uređajima, a temperaturu tankova prosleđuje fermentation-service-u kao IoT merenje aktivnog batch-a (najviše jednom u `FERMENTATION_FORWARD_INTERVAL_SECS`)
+
+REST API iot-service-a (JWT):
+
+| Metoda | Putanja | Opis |
+|--------|---------|------|
+| GET  | `/api/v1/devices` | Lista uređaja (online/offline, interval) |
+| GET  | `/api/v1/devices/:device_id` | Jedan uređaj |
+| POST | `/api/v1/devices/:device_id/commands` | `{"command":"set_interval","interval_seconds":30}` / `read_now` / `ping` (ne za radnike) |
+| GET  | `/api/v1/readings?target_type=&target_id=&device_id=&from=&to=&limit=` | Istorija merenja |
+| GET  | `/api/v1/readings/latest?target_type=tank` | Poslednje merenje po tanku / vinogradu |
+| GET  | `/api/v1/readings/stats?target_type=&target_id=&from=&to=` | Min / max / prosek (podrazumevano 24h) |
+| GET  | `/api/v1/readings/series?target_type=&target_id=&from=&to=&bucket_minutes=` | Proseci po intervalima (za grafikone) |
+
+Frontend stranica **IoT Senzori** (`/iot`) prikazuje uređaje (online/offline, komande), trenutne vrednosti po tanku i vinogradu i grafikone istorije (6h / 24h / 7 dana), uz automatsko osvežavanje na 15s.
+
+### Simulator (bez Raspberry Pi-ja)
+
+```bash
+cp iot-device/settings.simulator.example.json iot-device/settings.simulator.json
+# upiši ID-eve postojećih tankova / vinograda u target_id
+docker compose --profile simulator up -d iot-simulator
+```
+
+Simulirana merenja se čuvaju u iot-service-u, ali se **ne** upisuju u fermentacione batch-eve.
 
 ---
 
 ## Pokretanje sistema
+
+**Docker (sve odjednom):** `docker compose up -d --build` pa otvoriti http://localhost:3000
+(frontend 3000, servisi 8001–8005, Mosquitto 1883).
 
 1. **Rust mikroservisi:** Pratite README svakog servisa za pokretanje (`cargo run`).
 2. **IoT skripte:** Potrebno je podesiti RPi uređaj, Python zavisnosti i kreirati `settings.json` fajl.

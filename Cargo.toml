@@ -5,7 +5,8 @@ members = [
     "harvest-service",
     "fermentation-service",
     "inventory-service",
-    "analytics-service"
+    "analytics-service",
+    "iot-service"
 ]
 
 resolver = "2"

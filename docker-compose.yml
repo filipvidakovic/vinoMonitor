@@ -77,6 +77,46 @@
     networks:
       - vinomonitor-network
 
+  postgres-iot:
+    image: postgres:16-alpine
+    container_name: vinomonitor-postgres-iot
+    environment:
+      POSTGRES_USER: vinomonitor
+      POSTGRES_PASSWORD: vinopassword
+      POSTGRES_DB: vinomonitor_iot
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres_iot_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vinomonitor -d vinomonitor_iot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vinomonitor-network
+
+  # ─────────────────────────────────────────────
+  # MQTT BROKER
+  # ─────────────────────────────────────────────
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: vinomonitor-mosquitto
+    ports:
+      - "1883:1883"   # Raspberry Pi uređaji se kače ovde (IP računara na LAN-u)
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - mosquitto_data:/mosquitto/data
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_sub -t '$$SYS/broker/uptime' -C 1 -W 3 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vinomonitor-network
+    restart: unless-stopped
+
   # ─────────────────────────────────────────────
   # SERVICES
   # ─────────────────────────────────────────────
@@ -196,25 +236,87 @@
       retries: 3
       start_period: 10s
 
-#  frontend:
-#    build:
-#      context: ./frontend
-#      dockerfile: Dockerfile
-#    container_name: vinomonitor-frontend
-#    depends_on:
-#      auth-service:
-#        condition: service_healthy
-#      vineyard-service:
-#        condition: service_healthy
-#      harvest-service:
-#        condition: service_healthy
-#      fermentation-service:
-#        condition: service_healthy
-#    ports:
-#      - "3000:80"
-#    networks:
-#      - vinomonitor-network
-#    restart: unless-stopped
+  iot-service:
+    build:
+      context: ./iot-service
+      dockerfile: Dockerfile
+    container_name: vinomonitor-iot-service
+    depends_on:
+      postgres-iot:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://vinomonitor:vinopassword@postgres-iot:5432/vinomonitor_iot
+      HOST: 0.0.0.0
+      PORT: 8005
+      JWT_SECRET: supersecret
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      RUST_LOG: info,iot_service=debug
+      MQTT_HOST: mosquitto
+      MQTT_PORT: 1883
+      MQTT_CLIENT_ID: iot-service
+      MQTT_TOPIC_PREFIX: vinomonitor
+      FERMENTATION_SERVICE_URL: http://fermentation-service:8004
+      FERMENTATION_FORWARD_INTERVAL_SECS: 600
+    ports:
+      - "8005:8005"
+    networks:
+      - vinomonitor-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8005/api/v1/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Simulirani Raspberry Pi (opciono): docker compose --profile simulator up -d
+  # Konfiguracija: iot-device/settings.simulator.json (kopija settings.simulator.example.json)
+  iot-simulator:
+    profiles: ["simulator"]
+    build:
+      context: ./iot-device
+      dockerfile: Dockerfile
+    container_name: vinomonitor-iot-simulator
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    volumes:
+      - ./iot-device/settings.simulator.json:/config/settings.json:ro
+    networks:
+      - vinomonitor-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_AUTH_API_URL: http://localhost:8001
+        VITE_VINEYARDS_API_URL: http://localhost:8002
+        VITE_HARVEST_API_URL: http://localhost:8003
+        VITE_FERMENTATION_API_URL: http://localhost:8004
+        VITE_IOT_API_URL: http://localhost:8005
+    container_name: vinomonitor-frontend
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      vineyard-service:
+        condition: service_healthy
+      harvest-service:
+        condition: service_healthy
+      fermentation-service:
+        condition: service_healthy
+      iot-service:
+        condition: service_healthy
+    ports:
+      - "3000:80"
+    networks:
+      - vinomonitor-network
+    restart: unless-stopped
 
 # ─────────────────────────────────────────────
 # VOLUMES & NETWORKS
@@ -225,6 +327,8 @@ volumes:
   postgres_vineyard_data:
   postgres_harvest_data:
   postgres_fermentation_data:
+  postgres_iot_data:
+  mosquitto_data:
 
 networks:
   vinomonitor-network:

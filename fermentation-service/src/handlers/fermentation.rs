@@ -17,7 +17,7 @@ use crate::{
     extractors::AuthenticatedUser,
     models::{
         AddReadingRequest, BatchResponse, BatchStats, CreateBatchRequest, CreateTankRequest,
-        FermentationStatus, IotReadingRequest, ReadingResponse, TankResponse, TankStatus,
+        FermentationStatus, IotReadingRequest, IotTankReadingRequest, ReadingResponse, TankResponse, TankStatus,
         UpdateBatchRequest, UpdateTankRequest, UserRole,
     },
 };
@@ -332,6 +332,29 @@ pub async fn iot_reading(
     Json(req): Json<IotReadingRequest>,
 ) -> Result<(StatusCode, Json<ReadingResponse>), AppError> {
     let reading = state.repo.add_iot_reading(req).await?;
+
+    Ok((StatusCode::CREATED, Json(ReadingResponse::from(reading))))
+}
+
+// IoT endpoint po tanku - reading ide u aktivni batch tog tanka
+pub async fn iot_tank_reading(
+    State(state): State<AppState>,
+    Path(tank_id): Path<Uuid>,
+    Json(req): Json<IotTankReadingRequest>,
+) -> Result<(StatusCode, Json<ReadingResponse>), AppError> {
+    req.validate()?;
+
+    let batch = state.repo.find_active_batch_by_tank(tank_id).await?;
+
+    let reading = state
+        .repo
+        .add_iot_reading(IotReadingRequest {
+            batch_id: batch.id,
+            temperature: req.temperature,
+            humidity: req.humidity,
+            recorded_at: req.recorded_at,
+        })
+        .await?;
 
     Ok((StatusCode::CREATED, Json(ReadingResponse::from(reading))))
 }

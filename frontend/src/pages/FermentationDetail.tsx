@@ -389,7 +389,7 @@ const FermentationDetail: React.FC = () => {
           </div>
         ) : (
           <div className="readings-timeline">
-            {readings.map((reading, index) => (
+            {readings.map((reading) => (
               <div key={reading.id} className="reading-item">
                 <div className="reading-date">
                   <div className="date-marker"></div>

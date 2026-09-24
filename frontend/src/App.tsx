@@ -11,6 +11,7 @@ import Harvests from './pages/Harvests';
 import VineyardDetail from './pages/VineyardDetail';
 import FermentationDetail from './pages/FermentationDetail';
 import HarvestDetail from './pages/HarvestDetail';
+import IoT from './pages/IoT';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -36,6 +37,7 @@ function App() {
             <Route path="harvests/:id" element={<HarvestDetail />} />
             <Route path="fermentation" element={<Fermentation />} />
             <Route path="fermentation/:id" element={<FermentationDetail />} />
+            <Route path="iot" element={<IoT />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

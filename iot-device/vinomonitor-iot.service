@@ -1,0 +1,18 @@
+# systemd servis za automatsko pokretanje na Raspberry Pi-ju
+#   sudo cp vinomonitor-iot.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now vinomonitor-iot
+#   journalctl -u vinomonitor-iot -f
+[Unit]
+Description=vinoMonitor IoT sensor client
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/vinomonitor/iot-device
+ExecStart=/home/pi/vinomonitor/iot-device/.venv/bin/python -m vinomonitor_iot --config settings.json
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

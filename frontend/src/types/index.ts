@@ -237,6 +237,57 @@ export interface CreateBatchRequest {
   notes?: string;
 }
 
+// ============== IoT ==============
+
+export type TargetType = 'tank' | 'vineyard';
+export type DeviceStatus = 'online' | 'offline';
+
+export interface IotDevice {
+  id: string;
+  status: DeviceStatus;
+  interval_seconds?: number;
+  simulated: boolean;
+  last_seen_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SensorReading {
+  id: string;
+  device_id: string;
+  target_type: TargetType;
+  target_id: string;
+  temperature?: number;
+  humidity?: number;
+  light_lux?: number;
+  recorded_at: string;
+  received_at: string;
+}
+
+export interface SeriesPoint {
+  bucket: string;
+  temperature?: number;
+  humidity?: number;
+  light_lux?: number;
+}
+
+export interface SensorStats {
+  total_readings: number;
+  avg_temperature?: number;
+  min_temperature?: number;
+  max_temperature?: number;
+  avg_humidity?: number;
+  min_humidity?: number;
+  max_humidity?: number;
+  avg_light_lux?: number;
+  max_light_lux?: number;
+}
+
+export type DeviceCommand =
+  | { command: 'set_interval'; interval_seconds: number }
+  | { command: 'read_now' }
+  | { command: 'ping' };
+
 // ============== API ==============
 
 export interface ApiError {

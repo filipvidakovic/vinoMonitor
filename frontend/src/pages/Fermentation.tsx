@@ -237,7 +237,6 @@ const Fermentation: React.FC = () => {
   };
 
   const availableTanks = tanks.filter((t) => t.status === 'available');
-  const activeBatches = batches.filter((b) => b.status === 'active');
 
   const canModify = user?.role === 'admin' || user?.role === 'winemaker';
 

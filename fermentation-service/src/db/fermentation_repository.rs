@@ -226,6 +226,19 @@ impl FermentationRepository {
         Ok(batches)
     }
 
+    pub async fn find_active_batch_by_tank(&self, tank_id: Uuid) -> Result<FermentationBatch, AppError> {
+        sqlx::query_as::<_, FermentationBatch>(
+            "SELECT * FROM fermentation_batches WHERE tank_id = $1 AND status = 'active' ORDER BY start_date DESC LIMIT 1",
+        )
+            .bind(tank_id)
+            .fetch_one(&self.pool)
+            .await
+            .map_err(|e| match e {
+                sqlx::Error::RowNotFound => AppError::NotFound("No active batch in this tank".to_string()),
+                _ => AppError::DatabaseError(e),
+            })
+    }
+
     pub async fn list_batches_by_tank(&self, tank_id: Uuid) -> Result<Vec<FermentationBatch>, AppError> {
         let batches = sqlx::query_as::<_, FermentationBatch>(
             "SELECT * FROM fermentation_batches WHERE tank_id = $1 ORDER BY created_at DESC",

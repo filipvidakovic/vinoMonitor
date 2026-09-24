@@ -203,6 +203,13 @@ Cargo.lock
 .env.local
 .env.production
 
+# IoT device (Python)
+iot-device/settings.json
+iot-device/settings.simulator.json
+__pycache__/
+*.pyc
+.venv/
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

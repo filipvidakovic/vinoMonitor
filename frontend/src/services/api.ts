@@ -50,3 +50,7 @@ export const harvestApi = createApiInstance(
 export const fermentationApi = createApiInstance(
   import.meta.env.VITE_FERMENTATION_API_URL + "/api/v1"
 );
+
+export const iotApi = createApiInstance(
+  import.meta.env.VITE_IOT_API_URL + "/api/v1"
+);

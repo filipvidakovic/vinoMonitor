@@ -10,7 +10,8 @@ pub fn create_router(state: AppState, settings: Settings) -> Router {
     // Public routes (health check + IoT endpoint bez JWT)
     let public_routes = Router::new()
         .route("/health", get(handlers::health_check))
-        .route("/iot/readings", post(handlers::iot_reading));
+        .route("/iot/readings", post(handlers::iot_reading))
+        .route("/iot/tanks/:tank_id/readings", post(handlers::iot_tank_reading));
 
     // Protected routes
     let protected_routes = Router::new()

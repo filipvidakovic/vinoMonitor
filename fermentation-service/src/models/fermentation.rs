@@ -20,7 +20,7 @@ pub enum TankStatus {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::Type, PartialEq, Eq)]
-#[sqlx(type_name = "tank_material", rename_all = "lowercase")]
+#[sqlx(type_name = "tank_material", rename_all = "snake_case")]
 pub enum TankMaterial {
     #[serde(rename = "stainless_steel")]
     StainlessSteel,
@@ -308,6 +308,15 @@ pub struct IotReadingRequest {
     pub batch_id: Uuid,
     pub temperature: f64,
     pub humidity: Option<f64>, // ako senzor ima i vlažnost
+    pub recorded_at: Option<DateTime<Utc>>,
+}
+
+// IoT reading po tanku (šalje iot-service, batch se određuje automatski)
+#[derive(Debug, Deserialize, Validate)]
+pub struct IotTankReadingRequest {
+    #[validate(range(min = -5.0, max = 45.0, message = "Temperature must be -5 to 45°C"))]
+    pub temperature: f64,
+    pub humidity: Option<f64>,
     pub recorded_at: Option<DateTime<Utc>>,
 }
 

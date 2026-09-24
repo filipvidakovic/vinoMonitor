@@ -38,6 +38,9 @@ const Layout: React.FC = () => {
             <Link to="/fermentation" className={`nav-link ${isActive('/fermentation') ? 'active' : ''}`}>
               Fermentacija
             </Link>
+            <Link to="/iot" className={`nav-link ${isActive('/iot') ? 'active' : ''}`}>
+              IoT Senzori
+            </Link>
           </div>
 
           <div className="navbar-user">

@@ -1,0 +1,39 @@
+{
+  "device_id": "rpi-cellar-01",
+  "mqtt": {
+    "host": "192.168.1.100",
+    "port": 1883,
+    "username": null,
+    "password": null,
+    "topic_prefix": "vinomonitor"
+  },
+  "interval_seconds": 60,
+  "simulate": false,
+  "targets": [
+    {
+      "name": "Tank 1",
+      "target_type": "tank",
+      "target_id": "00000000-0000-0000-0000-000000000001",
+      "sensors": [
+        { "type": "dht22", "pin": "D4" }
+      ]
+    },
+    {
+      "name": "Tank 2",
+      "target_type": "tank",
+      "target_id": "00000000-0000-0000-0000-000000000002",
+      "sensors": [
+        { "type": "dht22", "pin": "D17" }
+      ]
+    },
+    {
+      "name": "Vinograd Sever",
+      "target_type": "vineyard",
+      "target_id": "00000000-0000-0000-0000-000000000003",
+      "sensors": [
+        { "type": "bh1750", "address": "0x23" },
+        { "type": "ds18b20", "sensor_id": "auto" }
+      ]
+    }
+  ]
+}

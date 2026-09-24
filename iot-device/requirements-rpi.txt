@@ -1,0 +1,5 @@
+-r requirements.txt
+# Hardverski drajveri (samo na Raspberry Pi-ju)
+adafruit-blinka
+adafruit-circuitpython-dht
+adafruit-circuitpython-bh1750
