@@ -1,0 +1,471 @@
+.inventory-page {
+  max-width: 1400px;
+  --inv-accent: #6b2c91;
+  --inv-ink: #212529;
+  --inv-muted: #6c757d;
+  --inv-stock: #6b2c91;
+  --inv-sold: #adb5bd;
+  --inv-damaged: #d03b3b;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.inventory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.inventory-search {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.inventory-search .form-control {
+  min-width: 0;
+  width: 300px;
+  max-width: 100%;
+}
+
+/* ========== Stat tiles ========== */
+
+.inv-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.inv-stat {
+  background: white;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.inv-stat-label {
+  font-size: 0.85rem;
+  color: var(--inv-muted);
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.inv-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--inv-ink);
+  line-height: 1.1;
+}
+
+.inv-stat-detail {
+  font-size: 0.8rem;
+  color: #868e96;
+  margin-top: 4px;
+}
+
+.inv-empty {
+  padding: 24px;
+  color: #495057;
+  line-height: 1.6;
+}
+
+.inv-empty a {
+  color: var(--inv-accent);
+  font-weight: 600;
+}
+
+/* ========== Lot cards ========== */
+
+.inv-lots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.inv-lot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-decoration: none;
+  color: var(--inv-ink);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 2px solid transparent;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.inv-lot:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border-color: #d9c7e6;
+}
+
+.inv-lot:focus-visible {
+  outline: 3px solid #b99bd0;
+  outline-offset: 2px;
+}
+
+.inv-lot-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inv-lot-code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.8rem;
+  color: var(--inv-muted);
+}
+
+.inv-vintage {
+  background: #f3e5f5;
+  color: var(--inv-accent);
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  border-radius: 10px;
+}
+
+.inv-vintage-lg {
+  font-size: 1rem;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+
+.inv-lot-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.inv-lot-meta {
+  font-size: 0.85rem;
+  color: var(--inv-muted);
+}
+
+.inv-lot-numbers {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+
+.inv-bar {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #f1f3f5;
+}
+
+.inv-bar span {
+  display: block;
+  height: 100%;
+}
+
+.inv-bar-stock { background: var(--inv-stock); }
+.inv-bar-sold { background: var(--inv-sold); }
+.inv-bar-damaged { background: var(--inv-damaged); }
+
+.inv-lot-footer {
+  font-size: 0.75rem;
+  color: #868e96;
+}
+
+/* ========== Lot detail ========== */
+
+.inv-notes {
+  background: white;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  color: #495057;
+}
+
+.inv-section-hint {
+  color: var(--inv-muted);
+  font-size: 0.9rem;
+  margin: -8px 0 16px;
+}
+
+.provenance-grid {
+  margin-bottom: 32px;
+}
+
+.provenance-subtitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--inv-muted);
+  margin: 16px 0 6px;
+  padding-top: 12px;
+  border-top: 1px solid #f1f3f5;
+}
+
+.provenance-missing {
+  color: #868e96;
+  font-size: 0.9rem;
+}
+
+.provenance-quality {
+  font-size: 0.85rem;
+  padding: 4px 0;
+  color: #495057;
+}
+
+.provenance-quality-date {
+  font-variant-numeric: tabular-nums;
+  color: var(--inv-muted);
+  margin-right: 8px;
+}
+
+.info-value a {
+  color: var(--inv-accent);
+  font-weight: 600;
+}
+
+.inv-bottles-title {
+  margin-top: 8px;
+}
+
+.inv-filters {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #f1f3f5;
+  flex-wrap: wrap;
+}
+
+.inv-filters .form-control {
+  flex: 1 1 200px;
+  width: auto;
+}
+
+.inv-filters select.form-control {
+  flex: 0 1 180px;
+}
+
+.inv-table-wrap {
+  overflow-x: auto;
+}
+
+.inv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.inv-table th,
+.inv-table td {
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid #f1f3f5;
+  white-space: nowrap;
+}
+
+.inv-table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--inv-muted);
+  font-weight: 600;
+  background: #fafafa;
+}
+
+.inv-table-empty {
+  text-align: center !important;
+  color: #868e96;
+  padding: 24px !important;
+}
+
+.inv-serial {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-weight: 600;
+  color: var(--inv-accent);
+  text-decoration: none;
+}
+
+a.inv-serial:hover {
+  text-decoration: underline;
+}
+
+.inv-status-select {
+  padding: 5px 8px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: white;
+}
+
+.inv-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  color: var(--inv-muted);
+  flex-wrap: wrap;
+}
+
+.inv-pagination div {
+  display: flex;
+  gap: 8px;
+}
+
+/* Status: ikona + tekst */
+.bottle-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.bottle-status-in_stock { background: #e3f6e3; color: #0a6b0a; }
+.bottle-status-sold { background: #e9ecef; color: #495057; }
+.bottle-status-damaged { background: #fbe7e7; color: #a02828; }
+
+/* ========== Bottle label ========== */
+
+.bottle-label {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  background: linear-gradient(135deg, #3d1452 0%, #6b2c91 100%);
+  color: white;
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin: 16px 0 32px;
+  box-shadow: 0 6px 24px rgba(61, 20, 82, 0.25);
+}
+
+.bottle-label-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+.bottle-label-main {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.bottle-label-name {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.bottle-label-sub {
+  opacity: 0.85;
+  margin-top: 6px;
+}
+
+.bottle-label-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin-top: 20px;
+}
+
+.bottle-label-facts span {
+  display: flex;
+  flex-direction: column;
+}
+
+.bottle-label-facts small {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.7;
+}
+
+.bottle-label-facts strong {
+  font-size: 1.05rem;
+}
+
+.bottle-label-facts .inv-serial {
+  color: white;
+}
+
+.bottle-label-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.bottle-label-status small {
+  opacity: 0.75;
+  font-size: 0.75rem;
+}
+
+/* ========== Bottling modal ========== */
+
+.bottling-hint {
+  background: #fff8e1;
+  color: #6d4c00;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.bottling-preview {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: #f3e5f5;
+  color: #3d1452;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+
+.bottling-preview.invalid {
+  background: #fbe7e7;
+  color: #a02828;
+}
+
+.bottling-preview-count {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 4px;
+  color: var(--inv-muted, #6c757d);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+  .bottle-label {
+    padding: 20px;
+  }
+  .bottle-label-status {
+    align-items: flex-start;
+  }
+  .bottle-label-name {
+    font-size: 1.5rem;
+  }
+}

@@ -12,6 +12,9 @@ import VineyardDetail from './pages/VineyardDetail';
 import FermentationDetail from './pages/FermentationDetail';
 import HarvestDetail from './pages/HarvestDetail';
 import IoT from './pages/IoT';
+import Inventory from './pages/Inventory';
+import BottlingDetail from './pages/BottlingDetail';
+import BottleDetail from './pages/BottleDetail';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -38,6 +41,9 @@ function App() {
             <Route path="fermentation" element={<Fermentation />} />
             <Route path="fermentation/:id" element={<FermentationDetail />} />
             <Route path="iot" element={<IoT />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="inventory/lots/:id" element={<BottlingDetail />} />
+            <Route path="inventory/bottles/:serial" element={<BottleDetail />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

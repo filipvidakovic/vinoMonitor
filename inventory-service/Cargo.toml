@@ -4,3 +4,31 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+axum = { version = "0.7", features = ["macros"] }
+axum-extra = { version = "0.9", features = ["typed-header"] }
+tower = { version = "0.4", features = ["util"] }
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# MongoDB (fleksibilni dokumenti - svaka flaša nosi kompletno poreklo)
+mongodb = "2.8"
+
+uuid = { version = "1", features = ["v4", "serde"] }
+jsonwebtoken = "9"
+chrono = { version = "0.4", features = ["serde"] }
+dotenvy = "0.15"
+validator = { version = "0.18", features = ["derive"] }
+
+thiserror = "1"
+anyhow = "1"
+
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# HTTP klijent za vineyard / harvest / fermentation servise
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }

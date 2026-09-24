@@ -19,6 +19,7 @@
       retries: 5
     networks:
       - vinomonitor-network
+    restart: unless-stopped
 
   postgres-vineyard:
     image: postgres:16-alpine
@@ -38,6 +39,7 @@
       retries: 5
     networks:
       - vinomonitor-network
+    restart: unless-stopped
 
   postgres-harvest:
     image: postgres:16-alpine
@@ -57,6 +59,7 @@
       retries: 5
     networks:
       - vinomonitor-network
+    restart: unless-stopped
 
   postgres-fermentation:
     image: postgres:16-alpine
@@ -76,6 +79,7 @@
       retries: 5
     networks:
       - vinomonitor-network
+    restart: unless-stopped
 
   postgres-iot:
     image: postgres:16-alpine
@@ -95,6 +99,23 @@
       retries: 5
     networks:
       - vinomonitor-network
+    restart: unless-stopped
+
+  mongo-inventory:
+    image: mongo:7
+    container_name: vinomonitor-mongo-inventory
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_inventory_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vinomonitor-network
+    restart: unless-stopped
 
   # ─────────────────────────────────────────────
   # MQTT BROKER
@@ -273,6 +294,43 @@
       retries: 3
       start_period: 10s
 
+  inventory-service:
+    build:
+      context: ./inventory-service
+      dockerfile: Dockerfile
+    container_name: vinomonitor-inventory-service
+    depends_on:
+      mongo-inventory:
+        condition: service_healthy
+      fermentation-service:
+        condition: service_healthy
+      harvest-service:
+        condition: service_healthy
+      vineyard-service:
+        condition: service_healthy
+    environment:
+      MONGODB_URI: mongodb://mongo-inventory:27017
+      MONGODB_DB: vinomonitor_inventory
+      HOST: 0.0.0.0
+      PORT: 8006
+      JWT_SECRET: supersecret
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      RUST_LOG: info,inventory_service=debug
+      VINEYARD_SERVICE_URL: http://vineyard-service:8002
+      HARVEST_SERVICE_URL: http://harvest-service:8003
+      FERMENTATION_SERVICE_URL: http://fermentation-service:8004
+    ports:
+      - "8006:8006"
+    networks:
+      - vinomonitor-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8006/api/v1/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
   # Simulirani Raspberry Pi (opciono): docker compose --profile simulator up -d
   # Konfiguracija: iot-device/settings.simulator.json (kopija settings.simulator.example.json)
   iot-simulator:
@@ -300,6 +358,7 @@
         VITE_HARVEST_API_URL: http://localhost:8003
         VITE_FERMENTATION_API_URL: http://localhost:8004
         VITE_IOT_API_URL: http://localhost:8005
+        VITE_INVENTORY_API_URL: http://localhost:8006
     container_name: vinomonitor-frontend
     depends_on:
       auth-service:
@@ -311,6 +370,8 @@
       fermentation-service:
         condition: service_healthy
       iot-service:
+        condition: service_healthy
+      inventory-service:
         condition: service_healthy
     ports:
       - "3000:80"
@@ -329,6 +390,7 @@ volumes:
   postgres_fermentation_data:
   postgres_iot_data:
   mosquitto_data:
+  mongo_inventory_data:
 
 networks:
   vinomonitor-network:

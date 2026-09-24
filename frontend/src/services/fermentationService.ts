@@ -69,7 +69,7 @@ export const fermentationService = {
 
   async updateBatch(
     id: string,
-    data: Partial<CreateBatchRequest & { status?: FermentationStatus }>
+    data: Partial<CreateBatchRequest & { status?: FermentationStatus; end_date?: string }>
   ): Promise<FermentationBatch> {
     const response = await fermentationApi.put<FermentationBatch>(`/batches/${id}`, data);
     return response.data;

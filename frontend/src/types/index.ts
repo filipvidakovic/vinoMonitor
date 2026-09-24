@@ -288,6 +288,154 @@ export type DeviceCommand =
   | { command: 'read_now' }
   | { command: 'ping' };
 
+// ============== Inventory ==============
+
+export const BOTTLE_VOLUME_LITERS = 0.7;
+
+export type BottleStatus = 'in_stock' | 'sold' | 'damaged';
+
+export const BOTTLE_STATUS_LABELS: Record<BottleStatus, string> = {
+  in_stock: 'Na stanju',
+  sold: 'Prodato',
+  damaged: 'Oštećeno',
+};
+
+export interface VineyardInfo {
+  id: string;
+  name: string;
+  location: string;
+  total_area: number;
+  description?: string;
+}
+
+export interface ParcelInfo {
+  id: string;
+  name: string;
+  area: number;
+  grape_variety: string;
+  planting_year?: number;
+  soil_type?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+export interface QualityInfo {
+  brix?: number;
+  ph?: number;
+  acidity?: number;
+  berry_size?: string;
+  berry_color?: string;
+  grape_health?: string;
+  notes?: string;
+  measured_at: string;
+}
+
+export interface HarvestInfo {
+  id: string;
+  harvest_date: string;
+  status: string;
+  total_weight_kg?: number;
+  yield_per_hectare?: number;
+  weather_condition?: string;
+  temperature_celsius?: number;
+  humidity_percent?: number;
+  notes?: string;
+  quality_measurements: QualityInfo[];
+}
+
+export interface FermentationInfo {
+  batch_id: string;
+  batch_name: string;
+  grape_variety: string;
+  volume_liters: number;
+  yeast_strain?: string;
+  target_temperature?: number;
+  initial_brix?: number;
+  initial_ph?: number;
+  start_date?: string;
+  end_date?: string;
+  notes?: string;
+  tank_name?: string;
+  tank_material?: string;
+  stats: {
+    total_readings: number;
+    avg_temperature?: number;
+    min_temperature?: number;
+    max_temperature?: number;
+    latest_brix?: number;
+    latest_ph?: number;
+    latest_alcohol?: number;
+  };
+}
+
+export interface Provenance {
+  vineyard?: VineyardInfo;
+  parcel?: ParcelInfo;
+  harvest?: HarvestInfo;
+  fermentation: FermentationInfo;
+}
+
+export interface StatusCounts {
+  in_stock: number;
+  sold: number;
+  damaged: number;
+}
+
+export interface Bottling {
+  _id: string;
+  lot_code: string;
+  batch_id: string;
+  wine_name: string;
+  grape_variety: string;
+  vintage?: number;
+  wine_liters: number;
+  bottle_volume_liters: number;
+  bottle_count: number;
+  remainder_liters: number;
+  notes?: string;
+  bottled_by: string;
+  bottled_at: string;
+  provenance: Provenance;
+  counts: StatusCounts;
+}
+
+export interface BottleSummary {
+  _id: string;
+  serial: string;
+  number: number;
+  bottling_id: string;
+  lot_code: string;
+  wine_name: string;
+  vintage?: number;
+  volume_liters: number;
+  status: BottleStatus;
+  status_changed_at: string;
+}
+
+export interface Bottle extends BottleSummary {
+  grape_variety: string;
+  bottled_at: string;
+  provenance: Provenance;
+}
+
+export interface BottlesPage {
+  items: BottleSummary[];
+  total: number;
+}
+
+export interface InventoryStats {
+  lots: number;
+  counts: StatusCounts;
+  liters_in_stock: number;
+}
+
+export interface CreateBottlingRequest {
+  batch_id: string;
+  wine_liters: number;
+  wine_name?: string;
+  notes?: string;
+}
+
 // ============== API ==============
 
 export interface ApiError {

@@ -54,3 +54,7 @@ export const fermentationApi = createApiInstance(
 export const iotApi = createApiInstance(
   import.meta.env.VITE_IOT_API_URL + "/api/v1"
 );
+
+export const inventoryApi = createApiInstance(
+  import.meta.env.VITE_INVENTORY_API_URL + "/api/v1"
+);

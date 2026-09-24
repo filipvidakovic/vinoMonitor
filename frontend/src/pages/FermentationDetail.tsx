@@ -5,6 +5,9 @@ import { useAuth } from '../context/AuthContext';
 import type { FermentationBatch, FermentationReading, Tank, BatchStats } from '../types';
 import '../styles/FermentationDetail.css';
 import { pdfService } from '../services/pdfService';
+import { inventoryService } from '../services/inventoryService';
+import BottlingModal from '../components/BottlingModal';
+import type { Bottling } from '../types';
 
 const FermentationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -46,9 +49,17 @@ const FermentationDetail: React.FC = () => {
     notes: '',
   });
 
+  // undefined = inventory servis nedostupan / još se učitava, null = nije flaširano
+  const [bottling, setBottling] = useState<Bottling | null | undefined>(undefined);
+  const [showBottlingModal, setShowBottlingModal] = useState(false);
+
   useEffect(() => {
     if (id) {
       loadData();
+      inventoryService
+        .getBottlings(id)
+        .then((list) => setBottling(list[0] ?? null))
+        .catch(() => setBottling(undefined));
     }
   }, [id]);
 
@@ -230,6 +241,16 @@ const FermentationDetail: React.FC = () => {
           </div>
         </div>
         <div className="header-actions">
+          {bottling && (
+            <Link to={`/inventory/lots/${bottling._id}`} className="btn btn-secondary">
+              🍾 Lot {bottling.lot_code} ({bottling.bottle_count} flaša)
+            </Link>
+          )}
+          {canModify && bottling === null && (batch.status === 'active' || batch.status === 'completed') && (
+            <button className="btn btn-primary" onClick={() => setShowBottlingModal(true)}>
+              {batch.status === 'active' ? '🍾 Završi i flaširaj' : '🍾 Flaširaj vino'}
+            </button>
+          )}
           {canModify && (
             <button className="btn btn-danger" onClick={handleDeleteBatch}>
               Obriši batch
@@ -508,6 +529,21 @@ const FermentationDetail: React.FC = () => {
           </div>
         )}
       </div>
+
+      {showBottlingModal && (
+        <BottlingModal
+          batch={batch}
+          onClose={() => setShowBottlingModal(false)}
+          onBatchCompleted={() => {
+            // Bez loadData - ono prikazuje spinner i ugasilo bi modal usred flaširanja
+            fermentationService.getBatch(batch.id).then(setBatch).catch(() => {});
+          }}
+          onBottled={(b) => {
+            setShowBottlingModal(false);
+            navigate(`/inventory/lots/${b._id}`);
+          }}
+        />
+      )}
 
       {/* Reading Modal */}
       {showReadingModal && (
